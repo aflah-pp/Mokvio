@@ -60,6 +60,10 @@ class RuntimeWorkflowReportTestCase(TestCase):
             name="Products",
             slug="products",
             is_published=True,
+            get_method=True,
+            post_method=True,
+            patch_method=True,
+            delete_method=True,
             created_by=self.user,
         )
 
@@ -124,6 +128,12 @@ class RuntimeWorkflowReportTestCase(TestCase):
                     "slug": self.resource.slug,
                     "published": self.resource.is_published,
                     "resource_id": str(self.resource.pk),
+                    "methods": {
+                        "GET": self.resource.get_method,
+                        "POST": self.resource.post_method,
+                        "PATCH": self.resource.patch_method,
+                        "DELETE": self.resource.delete_method,
+                    },
                 },
             }
         )
@@ -265,6 +275,7 @@ class RuntimeWorkflowReportTestCase(TestCase):
                     "url": url,
                     "count": 5,
                     "status_code": response.status_code,
+                    "method_enabled": self.resource.get_method,
                 },
             }
         )
@@ -435,7 +446,7 @@ class RuntimeWorkflowReportTestCase(TestCase):
 
         report = {
             "report": "Mokvio Runtime Workflow",
-            "version": "1.0",
+            "version": "1.1",
             "status": "PASS",
             "workflow": {
                 "user": {
@@ -447,13 +458,19 @@ class RuntimeWorkflowReportTestCase(TestCase):
                     "id": str(self.project.pk),
                     "name": self.project.name,
                     "slug": self.project.slug,
-                    "is_published": (self.project.is_published),
+                    "is_published": self.project.is_published,
                 },
                 "resource": {
                     "id": str(self.resource.pk),
                     "name": self.resource.name,
                     "slug": self.resource.slug,
-                    "is_published": (self.resource.is_published),
+                    "is_published": self.resource.is_published,
+                    "methods": {
+                        "GET": self.resource.get_method,
+                        "POST": self.resource.post_method,
+                        "PATCH": self.resource.patch_method,
+                        "DELETE": self.resource.delete_method,
+                    },
                 },
                 "fields": fields_report,
                 "endpoint": {
@@ -511,4 +528,8 @@ class RuntimeWorkflowReportTestCase(TestCase):
         self.assertEqual(
             len(generated_report["workflow"]["generated_records"]),
             5,
+        )
+
+        self.assertTrue(
+            generated_report["workflow"]["resource"]["methods"]["GET"],
         )

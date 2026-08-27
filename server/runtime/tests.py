@@ -78,23 +78,15 @@ class RuntimeServiceTestCase(TestCase):
             created_by=self.user,
         )
 
-        record = RuntimeService.generate_record(
-            self.resource,
-        )
+        record = RuntimeService.generate_record(self.resource)
 
         self.assertIn("name", record)
         self.assertIn("price", record)
         self.assertIn("active", record)
 
-        self.assertIsInstance(
-            record["name"],
-            str,
-        )
+        self.assertIsInstance(record["name"], str)
 
-        self.assertIsInstance(
-            record["price"],
-            Decimal,
-        )
+        self.assertIsInstance(record["price"], Decimal)
 
         self.assertGreaterEqual(
             record["price"],
@@ -123,14 +115,9 @@ class RuntimeServiceTestCase(TestCase):
             created_by=self.user,
         )
 
-        record = RuntimeService.generate_record(
-            self.resource,
-        )
+        record = RuntimeService.generate_record(self.resource)
 
-        self.assertIn(
-            "id",
-            record,
-        )
+        self.assertIn("id", record)
 
         self.assertIsInstance(
             record["id"],
@@ -154,9 +141,7 @@ class RuntimeServiceTestCase(TestCase):
             created_by=self.user,
         )
 
-        record = RuntimeService.generate_record(
-            self.resource,
-        )
+        record = RuntimeService.generate_record(self.resource)
 
         self.assertIsInstance(
             record["date"],
@@ -180,9 +165,7 @@ class RuntimeServiceTestCase(TestCase):
             created_by=self.user,
         )
 
-        record = RuntimeService.generate_record(
-            self.resource,
-        )
+        record = RuntimeService.generate_record(self.resource)
 
         self.assertIsInstance(
             record["created-at"],
@@ -212,9 +195,7 @@ class RuntimeServiceTestCase(TestCase):
             created_by=self.user,
         )
 
-        record = RuntimeService.generate_record(
-            self.resource,
-        )
+        record = RuntimeService.generate_record(self.resource)
 
         self.assertEqual(
             list(record.keys()),
@@ -260,9 +241,7 @@ class RuntimeServiceTestCase(TestCase):
             ],
         )
 
-        record = RuntimeService.generate_record(
-            self.resource,
-        )
+        record = RuntimeService.generate_record(self.resource)
 
         self.assertIn(
             active_field.slug,
@@ -386,9 +365,7 @@ class RuntimeServiceTestCase(TestCase):
             ],
         )
 
-        record = RuntimeService.generate_record(
-            self.resource,
-        )
+        record = RuntimeService.generate_record(self.resource)
 
         self.assertEqual(
             record,
@@ -420,6 +397,10 @@ class RuntimeAPIViewTestCase(TestCase):
             slug="products",
             is_published=True,
             created_by=self.user,
+            get_method=True,
+            post_method=True,
+            patch_method=True,
+            delete_method=True,
         )
 
         self.url = reverse(
@@ -450,6 +431,17 @@ class RuntimeAPIViewTestCase(TestCase):
             created_by=self.user,
         )
 
+    def disable_method(self, method):
+        setattr(
+            self.resource,
+            f"{method}_method",
+            False,
+        )
+
+        self.resource.save(
+            update_fields=[f"{method}_method"],
+        )
+
     def test_public_endpoint_generates_single_record(self):
         self.create_field(
             name="Name",
@@ -460,10 +452,25 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data, dict)
-        self.assertIn("name", response.data)
-        self.assertIsInstance(response.data["name"], str)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIsInstance(
+            response.data,
+            dict,
+        )
+
+        self.assertIn(
+            "name",
+            response.data,
+        )
+
+        self.assertIsInstance(
+            response.data["name"],
+            str,
+        )
 
     def test_public_endpoint_generates_multiple_records(self):
         self.create_field(
@@ -480,13 +487,31 @@ class RuntimeAPIViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data, list)
-        self.assertEqual(len(response.data), 5)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIsInstance(
+            response.data,
+            list,
+        )
+
+        self.assertEqual(
+            len(response.data),
+            5,
+        )
 
         for record in response.data:
-            self.assertIn("name", record)
-            self.assertIsInstance(record["name"], str)
+            self.assertIn(
+                "name",
+                record,
+            )
+
+            self.assertIsInstance(
+                record["name"],
+                str,
+            )
 
     def test_default_count_is_one(self):
         self.create_field(
@@ -498,8 +523,15 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data, dict)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIsInstance(
+            response.data,
+            dict,
+        )
 
     def test_count_one_returns_object(self):
         self.create_field(
@@ -516,8 +548,15 @@ class RuntimeAPIViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data, dict)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIsInstance(
+            response.data,
+            dict,
+        )
 
     def test_count_greater_than_one_returns_list(self):
         self.create_field(
@@ -534,19 +573,209 @@ class RuntimeAPIViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data, list)
-        self.assertEqual(len(response.data), 10)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIsInstance(
+            response.data,
+            list,
+        )
+
+        self.assertEqual(
+            len(response.data),
+            10,
+        )
+
+    def test_get_method_lock_returns_400_when_disabled(self):
+        self.disable_method("get")
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertEqual(
+            response.data["message"],
+            "You didn't allowed this method on this resource.",
+        )
+
+    def test_post_method_lock_returns_400_when_disabled(self):
+        self.disable_method("post")
+
+        response = self.client.post(
+            self.url,
+            {
+                "name": "Test Product",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertEqual(
+            response.data["message"],
+            "You didn't allowed this method on this resource.",
+        )
+
+    def test_patch_method_lock_returns_400_when_disabled(self):
+        self.disable_method("patch")
+
+        response = self.client.patch(
+            self.url,
+            {
+                "name": "Updated Product",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertEqual(
+            response.data["message"],
+            "You didn't allowed this method on this resource.",
+        )
+
+    def test_delete_method_lock_returns_400_when_disabled(self):
+        self.disable_method("delete")
+
+        response = self.client.delete(
+            self.url,
+            {
+                "id": "123",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertEqual(
+            response.data["message"],
+            "You didn't allowed this method on this resource.",
+        )
+
+    def test_post_method_returns_success_when_enabled(self):
+        response = self.client.post(
+            self.url,
+            {},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "data",
+            response.data,
+        )
+
+    def test_patch_method_returns_success_when_enabled(self):
+        self.create_field(
+            name="Name",
+            slug="name",
+            data_type="string",
+            generator_key="person.full_name",
+        )
+
+        response = self.client.patch(
+            self.url,
+            {
+                "name": "Updated Product",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        self.assertEqual(
+            response.data["data"]["name"],
+            "Updated Product",
+        )
+
+    def test_delete_method_returns_success_with_id(self):
+        response = self.client.delete(
+            f"{self.url}?id=123",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        self.assertEqual(
+            response.data["message"],
+            "Mock record deleted successfully.",
+        )
+
+        self.assertEqual(
+            response.data["id"],
+            "123",
+        )
+
+    def test_delete_method_returns_success_without_id(self):
+        response = self.client.delete(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        self.assertEqual(
+            response.data["message"],
+            "All mock records deleted successfully.",
+        )
+
+        self.assertEqual(
+            response.data["resource"],
+            self.resource.name,
+        )
 
     def test_unpublished_project_returns_404(self):
         self.project.is_published = False
+
         self.project.save(
             update_fields=["is_published"],
         )
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_deleted_project_returns_404(self):
         self.project.deleted_at = timezone.now()
@@ -561,17 +790,24 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_unpublished_resource_returns_404(self):
         self.resource.is_published = False
+
         self.resource.save(
             update_fields=["is_published"],
         )
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_deleted_resource_returns_404(self):
         self.resource.deleted_at = timezone.now()
@@ -586,7 +822,10 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_nonexistent_project_returns_404(self):
         url = reverse(
@@ -599,7 +838,10 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_nonexistent_resource_returns_404(self):
         url = reverse(
@@ -612,7 +854,10 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_resource_from_another_project_cannot_be_accessed(self):
         other_project = Projects.objects.create(
@@ -641,7 +886,10 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_deleted_fields_are_not_returned(self):
         self.create_field(
@@ -674,9 +922,20 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("name", response.data)
-        self.assertNotIn("deleted", response.data)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIn(
+            "name",
+            response.data,
+        )
+
+        self.assertNotIn(
+            "deleted",
+            response.data,
+        )
 
     def test_no_active_fields_returns_empty_object(self):
         field = self.create_field(
@@ -701,8 +960,15 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, {})
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertEqual(
+            response.data,
+            {},
+        )
 
     def test_decimal_value_is_returned_as_json_number(self):
         self.create_field(
@@ -719,8 +985,15 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["price"], 50.0)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertEqual(
+            response.data["price"],
+            50.0,
+        )
 
     def test_uuid_value_is_returned_as_string(self):
         self.create_field(
@@ -732,10 +1005,19 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data["id"], str)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
 
-        parsed_uuid = UUID(response.data["id"])
+        self.assertIsInstance(
+            response.data["id"],
+            str,
+        )
+
+        parsed_uuid = UUID(
+            response.data["id"],
+        )
 
         self.assertEqual(
             parsed_uuid.version,
@@ -755,8 +1037,15 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIs(response.data["active"], True)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIs(
+            response.data["active"],
+            True,
+        )
 
     def test_fields_are_returned_using_display_order(self):
         first = self.create_field(
@@ -777,7 +1066,10 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
 
         self.assertEqual(
             list(response.data.keys()),
@@ -799,4 +1091,7 @@ class RuntimeAPIViewTestCase(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
