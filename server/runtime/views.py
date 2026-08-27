@@ -1,4 +1,5 @@
 from django.http import Http404
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -74,6 +75,10 @@ class RuntimeAPIView(APIView):
             project_slug=project_slug,
             resource_slug=resource_slug,
         )
+        if not resource.get_method:
+            return Response(
+                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         if count == 1:
             record = RuntimeService.generate_record(
@@ -103,6 +108,11 @@ class RuntimeAPIView(APIView):
             resource_slug=resource_slug,
         )
 
+        if not resource.post_method:
+            return Response(
+                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer = RuntimeRequestSerializer(
             resource=resource,
             data=request.data,
@@ -124,6 +134,10 @@ class RuntimeAPIView(APIView):
             project_slug=project_slug,
             resource_slug=resource_slug,
         )
+        if not resource.patch_method:
+            return Response(
+                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         serializer = RuntimePatchSerializer(
             resource=resource,
@@ -148,6 +162,10 @@ class RuntimeAPIView(APIView):
             project_slug=project_slug,
             resource_slug=resource_slug,
         )
+        if not resource.delete_method:
+            return Response(
+                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         if record_id:
             return Response(

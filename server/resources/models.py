@@ -15,20 +15,24 @@ DATA_TYPE_CHOICES = [
 ]
 
 
-class Resources(UUIDPrimaryKeyMixin, AuditMixin):
+class HTTPMethods(models.Model):
+    get_method = models.BooleanField(default=False)
+    post_method = models.BooleanField(default=False)
+    patch_method = models.BooleanField(default=False)
+    delete_method = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+
+class Resources(UUIDPrimaryKeyMixin, AuditMixin, HTTPMethods):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=100, db_index=True)
-    project = models.ForeignKey(
-        Projects, on_delete=models.CASCADE, related_name="resources"
-    )
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name="resources")
     is_published = models.BooleanField(default=False)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["project", "slug"], name="unique_project_resource_slug"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["project", "slug"], name="unique_project_resource_slug")]
         indexes = [
             models.Index(fields=["slug", "is_published"]),
             models.Index(fields=["project", "slug"]),
@@ -49,9 +53,7 @@ class Fields(UUIDPrimaryKeyMixin, AuditMixin):
     Model for a single Field/Column inside a Resource.
     """
 
-    resource = models.ForeignKey(
-        Resources, on_delete=models.CASCADE, related_name="fields"
-    )
+    resource = models.ForeignKey(Resources, on_delete=models.CASCADE, related_name="fields")
 
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, db_index=True)
@@ -68,9 +70,7 @@ class Fields(UUIDPrimaryKeyMixin, AuditMixin):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["resource", "slug"], name="unique_resource_field_slug"
-            ),
+            models.UniqueConstraint(fields=["resource", "slug"], name="unique_resource_field_slug"),
         ]
         indexes = [
             models.Index(fields=["resource", "display_order"]),
@@ -81,11 +81,7 @@ class Fields(UUIDPrimaryKeyMixin, AuditMixin):
     @classmethod
     def get_next_display_order(cls, resource_id):
         """Return the next available display_order for a resource."""
-        last = (
-            cls.objects.filter(resource_id=resource_id)
-            .order_by("-display_order")
-            .first()
-        )
+        last = cls.objects.filter(resource_id=resource_id).order_by("-display_order").first()
         return (last.display_order + 1) if last else 1
 
     def save(self, *args, **kwargs):
