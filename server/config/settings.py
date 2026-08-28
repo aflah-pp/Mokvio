@@ -1,3 +1,4 @@
+import ssl
 from datetime import timedelta
 from pathlib import Path
 
@@ -21,11 +22,7 @@ if ENVIRONMENT not in {"development", "production"}:
     raise ValueError("DJANGO_ENV must be either 'development' or 'production'.")
 
 
-ENV_FILE = (
-    BASE_DIR / ".env.production"
-    if ENVIRONMENT == "production"
-    else BASE_DIR / ".env.development"
-)
+ENV_FILE = BASE_DIR / ".env.production" if ENVIRONMENT == "production" else BASE_DIR / ".env.development"
 
 
 if ENV_FILE.exists():
@@ -119,10 +116,7 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
-        ),
+        "NAME": ("django.contrib.auth.password_validation." "UserAttributeSimilarityValidator"),
     },
     {
         "NAME": ("django.contrib.auth.password_validation." "MinimumLengthValidator"),
@@ -176,9 +170,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_PARSER_CLASSES": (
@@ -340,4 +332,45 @@ SECURE_REFERRER_POLICY = env(
 SECURE_PROXY_SSL_HEADER = (
     "HTTP_X_FORWARDED_PROTO",
     "https",
+)
+
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND",default="")
+CELERY_REDIS_BACKEND_USE_SSL = {
+    "ssl_cert_reqs": ssl.CERT_REQUIRED,
+}
+CELERY_BROKER_URL = env(
+    "CELERY_BROKER_URL",
+    default="redis://localhost:6379/0",
+)
+
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+if CELERY_BROKER_URL.startswith("rediss://"):
+    CELERY_BROKER_USE_SSL = {
+        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+    }
+
+TELEGRAM_BOT_TOKEN = env(
+    "TELEGRAM_BOT_TOKEN",
+    default="",
+)
+
+TELEGRAM_ADMIN_CHAT_IDS = [
+    chat_id.strip()
+    for chat_id in env(
+        "TELEGRAM_ADMIN_CHAT_IDS",
+        default="",
+    ).split(",")
+    if chat_id.strip()
+]
+
+TELEGRAM_WEBHOOK_SECRET = env(
+    "TELEGRAM_WEBHOOK_SECRET",
+    default="",
 )
