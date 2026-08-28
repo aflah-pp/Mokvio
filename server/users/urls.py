@@ -56,4 +56,9 @@ urlpatterns = [
         views.DeactivateAccountView.as_view(),
         name="deactivate-account",
     ),
+    path(
+        "feedback/new/",
+        views.FeedBackCreateView.as_view(),
+        name="Publish-feedback",
+    ),
 ]

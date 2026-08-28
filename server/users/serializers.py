@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from users.models import User
+from users.models import FeedBack, User
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -117,3 +117,9 @@ class ChangePasswordSerializer(serializers.Serializer):
         attrs.pop("new_password_confirm")
 
         return attrs
+
+
+class FeedBackCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedBack
+        fields = ["title", "description", "steps_to_reproduce", "actual_behavior", "type_of_feedback"]
