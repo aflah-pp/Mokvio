@@ -1,9 +1,11 @@
 import logging
+from unittest.mock import patch
 
 from django.test import TestCase
-from rest_framework.test import APIClient
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
-from users.models import User
+from users.models import FeedBack, User
 from users.service import AccountService
 
 logger = logging.getLogger(__name__)
@@ -597,3 +599,59 @@ class UserAPITests(TestCase):
                 "FAILURE | UserAPITests.test_deactivate_account_endpoint",
             )
             raise
+
+
+class FeedBackApiTests(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="feedbackowner",
+            email="owner@example.com",
+            password="StrongPassword123",
+        )
+
+        self.url = "/api/v1/users/feedback/new/"
+
+    @patch("users.service.send_feedback_telegram_notification.delay")
+    def test_create_feedback(self, mock_task):
+        self.client.force_authenticate(user=self.user)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(
+                self.url,
+                {
+                    "title": "Hello",
+                    "description": "Need help",
+                    "steps_to_reproduce": "steps_to_reproduce1,2,3,4",
+                    "actual_behavior": "actual_behavior,2,3,4,4",
+                    "type_of_feedback": FeedBack.Types.BUG_REPORT,
+                },
+                format="json",
+            )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+        feedback = FeedBack.objects.get()
+
+        self.assertEqual(feedback.created_by, self.user)
+        self.assertEqual(feedback.title, "Hello")
+        self.assertEqual(feedback.description, "Need help")
+        self.assertEqual(
+            feedback.steps_to_reproduce,
+            "steps_to_reproduce1,2,3,4",
+        )
+        self.assertEqual(
+            feedback.actual_behavior,
+            "actual_behavior,2,3,4,4",
+        )
+        self.assertEqual(
+            feedback.type_of_feedback,
+            FeedBack.Types.BUG_REPORT,
+        )
+
+        self.assertTrue(feedback.ticket.startswith("MOK-"))
+
+        mock_task.assert_called_once_with(str(feedback.pk))
