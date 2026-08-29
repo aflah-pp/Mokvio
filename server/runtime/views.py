@@ -77,7 +77,8 @@ class RuntimeAPIView(APIView):
         )
         if not resource.get_method:
             return Response(
-                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "You didn't allowed this method on this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         if count == 1:
@@ -110,7 +111,8 @@ class RuntimeAPIView(APIView):
 
         if not resource.post_method:
             return Response(
-                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "You didn't allowed this method on this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer = RuntimeRequestSerializer(
@@ -136,7 +138,8 @@ class RuntimeAPIView(APIView):
         )
         if not resource.patch_method:
             return Response(
-                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "You didn't allowed this method on this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer = RuntimePatchSerializer(
@@ -164,7 +167,8 @@ class RuntimeAPIView(APIView):
         )
         if not resource.delete_method:
             return Response(
-                {"message": "You didn't allowed this method on this resource."}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "You didn't allowed this method on this resource."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         if record_id:

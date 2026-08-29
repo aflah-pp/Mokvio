@@ -210,10 +210,6 @@ class ResourceService:
     @staticmethod
     @transaction.atomic
     def create(project, validated_data, user):
-        """
-        Create a new resource under the given project.
-        """
-
         name = validated_data["name"].strip()
 
         if not name:
@@ -235,6 +231,10 @@ class ResourceService:
                 slug=slug,
                 is_published=False,
                 created_by=user,
+                get_method=validated_data.get("get_method", True),
+                post_method=validated_data.get("post_method", False),
+                patch_method=validated_data.get("patch_method", False),
+                delete_method=validated_data.get("delete_method", False),
             )
         except IntegrityError as exc:
             raise ValidationError(

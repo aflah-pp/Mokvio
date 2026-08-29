@@ -6,8 +6,11 @@ import AppLayout from "@/components/layout/app-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { getResource, publishResource, unpublishResource } from "@/service/endpoints/resources";
+
 import { getFields, deleteField } from "@/service/endpoints/fields";
+
 import ResourceFieldsTable from "@/features/resources/components/ResourceFieldsTable";
 import ResourceRuntime from "@/features/resources/components/ResourceRuntime";
 
@@ -68,6 +71,15 @@ export default function ResourceDetailPage() {
     : Array.isArray(fieldsQuery.data?.results)
       ? fieldsQuery.data.results
       : [];
+
+  const allowedMethods = resource
+    ? [
+        resource.get_method && "GET",
+        resource.post_method && "POST",
+        resource.patch_method && "PATCH",
+        resource.delete_method && "DELETE",
+      ].filter(Boolean)
+    : [];
 
   const handleCreateField = () => {
     navigate(`/project/${projectSlug}/resources/${resourceSlug}/fields/create`);
@@ -140,15 +152,17 @@ export default function ResourceDetailPage() {
               </Link>
             </Button>
 
-            <Button
-              variant={resource.is_published ? "outline" : "default"}
-              disabled={isPublishing}
-              onClick={() => publishMutation.mutate()}
-            >
-              <Settings2 className="mr-2 size-4" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant={resource.is_published ? "outline" : "default"}
+                disabled={isPublishing}
+                onClick={() => publishMutation.mutate()}
+              >
+                <Settings2 className="mr-2 size-4" />
 
-              {isPublishing ? "Updating..." : resource.is_published ? "Unpublish" : "Publish"}
-            </Button>
+                {isPublishing ? "Updating..." : resource.is_published ? "Unpublish" : "Publish"}
+              </Button>
+            </div>
           </div>
 
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -168,9 +182,19 @@ export default function ResourceDetailPage() {
 
                 <p className="mt-1 font-mono text-sm text-muted-foreground">/{resource.slug}</p>
 
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Resource in <span className="font-medium text-foreground">{projectSlug}</span>
-                </p>
+                <p className="mt-3 text-sm font-medium">Allowed Methods</p>
+
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {allowedMethods.length > 0 ? (
+                    allowedMethods.map((method) => (
+                      <Badge key={method} variant="outline" className="font-mono">
+                        {method}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">No methods enabled</span>
+                  )}
+                </div>
               </div>
             </div>
 

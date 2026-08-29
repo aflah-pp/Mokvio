@@ -16,7 +16,7 @@ DATA_TYPE_CHOICES = [
 
 
 class HTTPMethods(models.Model):
-    get_method = models.BooleanField(default=False)
+    get_method = models.BooleanField(default=True)
     post_method = models.BooleanField(default=False)
     patch_method = models.BooleanField(default=False)
     delete_method = models.BooleanField(default=False)

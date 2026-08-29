@@ -6,7 +6,7 @@ from .models import Fields, Resources
 class ResourceCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resources
-        fields = ("name",)
+        fields = ("name", "get_method", "post_method", "patch_method", "delete_method")
 
     def validate_name(self, value):
         value = value.strip()
@@ -118,10 +118,6 @@ class FieldDetailSerializer(serializers.ModelSerializer):
 
 
 class ResourceDetailSerializer(serializers.ModelSerializer):
-    fields = FieldDetailSerializer(
-        many=True,
-        read_only=True,
-    )
 
     class Meta:
         model = Resources
@@ -131,7 +127,10 @@ class ResourceDetailSerializer(serializers.ModelSerializer):
             "slug",
             "project",
             "is_published",
-            "fields",
+            "get_method",
+            "post_method",
+            "patch_method",
+            "delete_method",
             "created_at",
             "updated_at",
         )

@@ -5,48 +5,84 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { createFeedback } from "@/service/endpoints/feedback";
+
 export default function FeedbackForm({ feedbackTypes }) {
-  const [feedbackType, setFeedbackType] = useState("BUG");
+  const [feedbackType, setFeedbackType] = useState("BUG REPORT");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [stepsToReproduce, setStepsToReproduce] = useState("");
-  const [expectedBehavior, setExpectedBehavior] = useState("");
   const [actualBehavior, setActualBehavior] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const selectedType =
     feedbackTypes.find((item) => item.value === feedbackType) ?? feedbackTypes[0];
 
-  const SelectedIcon = selectedType.icon;
+  const SelectedIcon = selectedType?.icon;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!title.trim() || !description.trim()) {
+    const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
+    const trimmedSteps = stepsToReproduce.trim();
+    const trimmedActual = actualBehavior.trim();
+
+    if (!trimmedTitle || !trimmedDescription) {
+      setError("Title and description are required.");
+      return;
+    }
+
+    if (trimmedTitle.length > 50) {
+      setError("Title must be 50 characters or less.");
+      return;
+    }
+
+    if (trimmedDescription.length > 150) {
+      setError("Description must be 150 characters or less.");
+      return;
+    }
+
+    if (trimmedSteps.length > 150) {
+      setError("Steps to reproduce must be 150 characters or less.");
+      return;
+    }
+
+    if (trimmedActual.length > 150) {
+      setError("Actual behavior must be 150 characters or less.");
       return;
     }
 
     setSubmitting(true);
+    setError("");
 
     const payload = {
-      type: feedbackType,
-      title: title.trim(),
-      description: description.trim(),
-      steps_to_reproduce: stepsToReproduce.trim(),
-      expected_behavior: expectedBehavior.trim(),
-      actual_behavior: actualBehavior.trim(),
-      page_url: window.location.href,
-      user_agent: navigator.userAgent,
+      type_of_feedback: feedbackType,
+      title: trimmedTitle,
+      description: trimmedDescription,
+      steps_to_reproduce: trimmedSteps,
+      actual_behavior: trimmedActual,
     };
 
     try {
-      // eslint-disable-next-line no-console
-      console.log(payload);
-
-      await new Promise((resolve) => setTimeout(resolve, 700));
-
+      await createFeedback(payload);
       setSubmitted(true);
+    } catch (submissionError) {
+      const responseData = submissionError?.response?.data;
+
+      if (responseData?.detail) {
+        setError(responseData.detail);
+      } else if (responseData?.title?.[0]) {
+        setError(responseData.title[0]);
+      } else if (responseData?.description?.[0]) {
+        setError(responseData.description[0]);
+      } else if (responseData?.type_of_feedback?.[0]) {
+        setError(responseData.type_of_feedback[0]);
+      } else {
+        setError("Failed to submit feedback. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -54,12 +90,12 @@ export default function FeedbackForm({ feedbackTypes }) {
 
   const resetForm = () => {
     setSubmitted(false);
-    setFeedbackType("BUG");
+    setFeedbackType("BUG REPORT");
     setTitle("");
     setDescription("");
     setStepsToReproduce("");
-    setExpectedBehavior("");
     setActualBehavior("");
+    setError("");
   };
 
   if (submitted) {
@@ -73,8 +109,7 @@ export default function FeedbackForm({ feedbackTypes }) {
           <h2 className="mt-5 text-xl font-bold tracking-tight">Feedback received.</h2>
 
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-            Thanks for helping improve Mokvio. Your feedback has been recorded and will be
-            reviewed.
+            Thanks for helping improve Mokvio. Your feedback has been recorded and will be reviewed.
           </p>
 
           <Button type="button" variant="outline" className="mt-6" onClick={resetForm}>
@@ -106,7 +141,10 @@ export default function FeedbackForm({ feedbackTypes }) {
                 <button
                   key={item.value}
                   type="button"
-                  onClick={() => setFeedbackType(item.value)}
+                  onClick={() => {
+                    setFeedbackType(item.value);
+                    setError("");
+                  }}
                   className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
                     active
                       ? "border-primary/30 bg-primary/5"
@@ -142,7 +180,7 @@ export default function FeedbackForm({ feedbackTypes }) {
               <li>• Explain what happened.</li>
               <li>• Tell us what you expected.</li>
               <li>• Include reproduction steps for bugs.</li>
-              <li>• Screenshots are useful when relevant.</li>
+              <li>• Keep each field within the allowed length.</li>
             </ul>
           </div>
         </aside>
@@ -165,7 +203,10 @@ export default function FeedbackForm({ feedbackTypes }) {
                     <button
                       key={item.value}
                       type="button"
-                      onClick={() => setFeedbackType(item.value)}
+                      onClick={() => {
+                        setFeedbackType(item.value);
+                        setError("");
+                      }}
                       className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
                         active ? "border-primary/30 bg-primary/5 text-primary" : "hover:bg-muted/40"
                       }`}
@@ -179,6 +220,12 @@ export default function FeedbackForm({ feedbackTypes }) {
               </div>
             </div>
 
+            {error && (
+              <div className="mt-5 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+                {error}
+              </div>
+            )}
+
             <div className="mt-5 space-y-2">
               <label htmlFor="title" className="text-xs font-medium">
                 Title
@@ -187,13 +234,17 @@ export default function FeedbackForm({ feedbackTypes }) {
               <Input
                 id="title"
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) => {
+                  setTitle(event.target.value);
+                  setError("");
+                }}
                 placeholder="Briefly describe your feedback"
-                maxLength={120}
+                maxLength={50}
                 required
+                disabled={submitting}
               />
 
-              <p className="text-right text-[10px] text-muted-foreground">{title.length}/120</p>
+              <p className="text-right text-[10px] text-muted-foreground">{title.length}/50</p>
             </div>
 
             <div className="mt-4 space-y-2">
@@ -204,19 +255,23 @@ export default function FeedbackForm({ feedbackTypes }) {
               <Textarea
                 id="description"
                 value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Describe the problem, idea, or feedback in as much detail as necessary."
+                onChange={(event) => {
+                  setDescription(event.target.value);
+                  setError("");
+                }}
+                placeholder="Describe the problem, idea, or feedback."
                 className="min-h-28 resize-none"
-                maxLength={5000}
+                maxLength={150}
                 required
+                disabled={submitting}
               />
 
               <p className="text-right text-[10px] text-muted-foreground">
-                {description.length}/5000
+                {description.length}/150
               </p>
             </div>
 
-            {feedbackType === "BUG" && (
+            {feedbackType === "BUG REPORT" && (
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="steps" className="text-xs font-medium">
@@ -226,11 +281,19 @@ export default function FeedbackForm({ feedbackTypes }) {
                   <Textarea
                     id="steps"
                     value={stepsToReproduce}
-                    onChange={(event) => setStepsToReproduce(event.target.value)}
+                    onChange={(event) => {
+                      setStepsToReproduce(event.target.value);
+                      setError("");
+                    }}
                     placeholder={"1. Open...\n2. Click...\n3. Observe..."}
                     className="min-h-24 resize-none"
-                    maxLength={3000}
+                    maxLength={150}
+                    disabled={submitting}
                   />
+
+                  <p className="text-right text-[10px] text-muted-foreground">
+                    {stepsToReproduce.length}/150
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -241,42 +304,43 @@ export default function FeedbackForm({ feedbackTypes }) {
                   <Textarea
                     id="actual"
                     value={actualBehavior}
-                    onChange={(event) => setActualBehavior(event.target.value)}
+                    onChange={(event) => {
+                      setActualBehavior(event.target.value);
+                      setError("");
+                    }}
                     placeholder="What actually happened?"
                     className="min-h-24 resize-none"
-                    maxLength={3000}
+                    maxLength={150}
+                    disabled={submitting}
                   />
+
+                  <p className="text-right text-[10px] text-muted-foreground">
+                    {actualBehavior.length}/150
+                  </p>
                 </div>
               </div>
             )}
 
-            {feedbackType !== "BUG" && (
-              <div className="mt-4 space-y-2">
-                <label htmlFor="expected" className="text-xs font-medium">
-                  What would you like to see?
-                </label>
+            {feedbackType !== "BUG REPORT" && (
+              <div className="mt-4 rounded-lg border bg-muted/20 px-3 py-3">
+                <p className="text-xs font-medium">Feedback details</p>
 
-                <Textarea
-                  id="expected"
-                  value={expectedBehavior}
-                  onChange={(event) => setExpectedBehavior(event.target.value)}
-                  placeholder="Describe the outcome or improvement you would like."
-                  className="min-h-24 resize-none"
-                  maxLength={3000}
-                />
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Describe the improvement, issue, or suggestion in the description above.
+                </p>
               </div>
             )}
 
             <div className="mt-4 rounded-lg border bg-muted/20 px-3 py-2.5">
               <div className="flex items-center gap-2">
-                <SelectedIcon className="size-3.5 text-primary" />
+                {SelectedIcon && <SelectedIcon className="size-3.5 text-primary" />}
 
-                <span className="text-[11px] font-medium">{selectedType.label}</span>
+                <span className="text-[11px] font-medium">{selectedType?.label}</span>
 
                 <span className="text-[10px] text-muted-foreground">·</span>
 
                 <span className="text-[10px] text-muted-foreground">
-                  Page context will be included automatically
+                  Your account will be attached automatically
                 </span>
               </div>
             </div>

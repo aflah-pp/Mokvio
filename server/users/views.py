@@ -10,13 +10,15 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
+from users.models import FeedBack
 from users.serializers import (
     ChangePasswordSerializer,
+    FeedBackCreateSerializer,
     UserCreateSerializer,
     UserDetailSerializer,
     UserUpdateSerializer,
 )
-from users.service import AccountService
+from users.service import AccountService, FeedbackService
 
 logger = logging.getLogger(__name__)
 
@@ -457,3 +459,18 @@ class DeactivateAccountView(APIView):
         )
 
         return clear_refresh_cookie(response)
+
+
+class FeedBackCreateView(generics.CreateAPIView):
+
+    queryset = FeedBack.objects.all()
+    serializer_class = FeedBackCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        feedback = FeedbackService.create_feedback(
+            created_by=self.request.user,
+            **serializer.validated_data,
+        )
+
+        serializer.instance = feedback

@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
@@ -12,7 +13,8 @@ from rest_framework_simplejwt.token_blacklist.models import (
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.models import User
+from shared.tasks import send_feedback_telegram_notification
+from users.models import FeedBack, User
 
 logger = logging.getLogger(__name__)
 
@@ -478,3 +480,47 @@ class AccountService:
         )
 
         return user
+
+
+class FeedbackService:
+
+    @staticmethod
+    @transaction.atomic
+    def create_feedback(
+        *,
+        created_by,
+        title: str,
+        description: str,
+        steps_to_reproduce: str,
+        actual_behavior: str,
+        type_of_feedback: str = FeedBack.Types.GENERAL,
+    ) -> FeedBack:
+
+        title = title.strip()
+        description = description.strip()
+        steps_to_reproduce = steps_to_reproduce.strip()
+        actual_behavior = actual_behavior.strip()
+
+        if not title:
+            raise ValidationError({"title": "Title must not be empty."})
+
+        if not description:
+            raise ValidationError({"description": "Description must be provided."})
+
+        ticket = f"MOK-{get_random_string(8).upper()}"
+
+        feedback = FeedBack.objects.create(
+            created_by=created_by,
+            ticket=ticket,
+            title=title,
+            description=description,
+            steps_to_reproduce=steps_to_reproduce,
+            actual_behavior=actual_behavior,
+            type_of_feedback=type_of_feedback,
+        )
+
+        transaction.on_commit(
+            lambda: send_feedback_telegram_notification.delay(str(feedback.pk))
+        )
+
+        return feedback
