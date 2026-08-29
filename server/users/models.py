@@ -55,10 +55,21 @@ class FeedBack(UUIDPrimaryKeyMixin, AuditMixin):
     ticket = models.CharField(max_length=20, unique=True, db_index=True)
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=150)
-    steps_to_reproduce = models.CharField(max_length=150)
-    actual_behavior = models.CharField(max_length=150)
+    steps_to_reproduce = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+    )
+    actual_behavior = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+    )
+
     type_of_feedback = models.CharField(
-        max_length=50, choices=Types, default=Types.GENERAL
+        max_length=50,
+        choices=Types,
+        default=Types.GENERAL,
     )
 
     def __str__(self):

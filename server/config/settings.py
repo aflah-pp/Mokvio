@@ -1,4 +1,3 @@
-import ssl
 from datetime import timedelta
 from pathlib import Path
 
@@ -342,28 +341,6 @@ SECURE_PROXY_SSL_HEADER = (
     "HTTP_X_FORWARDED_PROTO",
     "https",
 )
-
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TASK_TRACK_STARTED = True
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="")
-CELERY_REDIS_BACKEND_USE_SSL = {
-    "ssl_cert_reqs": ssl.CERT_REQUIRED,
-}
-CELERY_BROKER_URL = env(
-    "CELERY_BROKER_URL",
-    default="redis://localhost:6379/0",
-)
-
-CELERY_TASK_IGNORE_RESULT = True
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_TIMEZONE = "UTC"
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
-if CELERY_BROKER_URL.startswith("rediss://"):
-    CELERY_BROKER_USE_SSL = {
-        "ssl_cert_reqs": ssl.CERT_REQUIRED,
-    }
 
 TELEGRAM_BOT_TOKEN = env(
     "TELEGRAM_BOT_TOKEN",
