@@ -609,11 +609,10 @@ class FeedBackApiTests(APITestCase):
             email="owner@example.com",
             password="StrongPassword123",
         )
-
         self.url = "/api/v1/users/feedback/new/"
 
-    @patch("users.service.send_feedback_telegram_notification.delay")
-    def test_create_feedback(self, mock_task):
+    @patch("users.service.TelegramService.send_ticket_notification")
+    def test_create_feedback(self, mock_telegram):
         self.client.force_authenticate(user=self.user)
 
         with self.captureOnCommitCallbacks(execute=True):
@@ -651,7 +650,6 @@ class FeedBackApiTests(APITestCase):
             feedback.type_of_feedback,
             FeedBack.Types.BUG_REPORT,
         )
-
         self.assertTrue(feedback.ticket.startswith("MOK-"))
 
-        mock_task.assert_called_once_with(str(feedback.pk))
+        mock_telegram.assert_called_once_with(feedback)
