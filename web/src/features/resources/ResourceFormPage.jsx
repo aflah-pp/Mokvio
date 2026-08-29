@@ -13,10 +13,16 @@ export default function ResourceFormPage() {
   const { projectSlug, resourceSlug } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
   const isEditing = Boolean(resourceSlug);
 
   const [name, setName] = useState("");
+  const [methods, setMethods] = useState({
+    get_method: true,
+    post_method: false,
+    patch_method: false,
+    delete_method: false,
+  });
+
   const [error, setError] = useState("");
   const {
     data: resource,
@@ -35,6 +41,13 @@ export default function ResourceFormPage() {
     if (resource) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(resource.name || "");
+
+      setMethods({
+        get_method: resource.get_method ?? true,
+        post_method: resource.post_method ?? false,
+        patch_method: resource.patch_method ?? false,
+        delete_method: resource.delete_method ?? false,
+      });
     }
   }, [resource]);
 
@@ -75,6 +88,15 @@ export default function ResourceFormPage() {
     },
   });
 
+  const handleMethodChange = (method) => {
+    setMethods((current) => ({
+      ...current,
+      [method]: !current[method],
+    }));
+
+    setError("");
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -90,10 +112,16 @@ export default function ResourceFormPage() {
       return;
     }
 
+    if (!Object.values(methods).some(Boolean)) {
+      setError("Select at least one HTTP method.");
+      return;
+    }
+
     setError("");
 
     mutation.mutate({
       name: trimmedName,
+      ...methods,
     });
   };
 
@@ -104,7 +132,6 @@ export default function ResourceFormPage() {
           <div className="mx-auto flex min-h-full w-full max-w-3xl items-center justify-center px-4">
             <div className="text-center">
               <p className="font-medium">Loading resource...</p>
-
               <p className="mt-1 text-sm text-muted-foreground">Fetching resource information.</p>
             </div>
           </div>
@@ -140,6 +167,28 @@ export default function ResourceFormPage() {
   }
 
   const isSubmitting = mutation.isPending;
+  const httpMethods = [
+    {
+      key: "get_method",
+      label: "GET",
+      description: "Fetch resources",
+    },
+    {
+      key: "post_method",
+      label: "POST",
+      description: "Create resources",
+    },
+    {
+      key: "patch_method",
+      label: "PATCH",
+      description: "Update resources",
+    },
+    {
+      key: "delete_method",
+      label: "DELETE",
+      description: "Delete resources",
+    },
+  ];
 
   return (
     <AppLayout>
@@ -172,8 +221,8 @@ export default function ResourceFormPage() {
 
               <CardDescription>
                 {isEditing
-                  ? "Changing the name will regenerate the resource URL slug."
-                  : "Give your resource a name. The URL slug will be generated automatically."}
+                  ? "Update the resource name and enabled HTTP methods."
+                  : "Give your resource a name and choose which HTTP methods it supports."}
               </CardDescription>
             </CardHeader>
 
@@ -204,6 +253,41 @@ export default function ResourceFormPage() {
                   <p className="text-xs text-muted-foreground">
                     Examples: Products, Customers, Orders, Drivers.
                   </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <Label>HTTP Methods</Label>
+
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Select the HTTP methods that should be available for this resource.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {httpMethods.map((method) => (
+                      <label
+                        key={method.key}
+                        htmlFor={method.key}
+                        className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                      >
+                        <input
+                          id={method.key}
+                          type="checkbox"
+                          checked={methods[method.key]}
+                          onChange={() => handleMethodChange(method.key)}
+                          disabled={isSubmitting}
+                          className="mt-1 size-4 accent-primary"
+                        />
+
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">{method.label}</p>
+
+                          <p className="text-xs text-muted-foreground">{method.description}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

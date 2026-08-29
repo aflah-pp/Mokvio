@@ -389,7 +389,9 @@ class AccountService:
         if user.check_password(new_password):
             raise ValidationError(
                 {
-                    "new_password": ("New password must be different from the " "current password."),
+                    "new_password": (
+                        "New password must be different from the " "current password."
+                    ),
                 }
             )
 
@@ -517,6 +519,8 @@ class FeedbackService:
             type_of_feedback=type_of_feedback,
         )
 
-        transaction.on_commit(lambda: send_feedback_telegram_notification.delay(str(feedback.pk)))
+        transaction.on_commit(
+            lambda: send_feedback_telegram_notification.delay(str(feedback.pk))
+        )
 
         return feedback

@@ -390,7 +390,8 @@ class ChangePasswordView(APIView):
 
         response = Response(
             {
-                "message": "Password changed successfully. " "All sessions have been logged out.",
+                "message": "Password changed successfully. "
+                "All sessions have been logged out.",
             },
             status=status.HTTP_200_OK,
         )

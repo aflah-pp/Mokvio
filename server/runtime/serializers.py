@@ -102,13 +102,17 @@ class RuntimeRequestSerializer(serializers.Serializer):
         unknown_fields = received_fields - set(defined_fields)
 
         if unknown_fields:
-            raise serializers.ValidationError({field: ["Unknown field."] for field in sorted(unknown_fields)})
+            raise serializers.ValidationError(
+                {field: ["Unknown field."] for field in sorted(unknown_fields)}
+            )
 
         for field_slug, field in defined_fields.items():
             generator = get_generator(field.generator_key)
 
             if generator is None:
-                raise serializers.ValidationError({field_slug: [f"Unknown generator: {field.generator_key}."]})
+                raise serializers.ValidationError(
+                    {field_slug: [f"Unknown generator: {field.generator_key}."]}
+                )
 
             generator_options = field.generator_options or {}
 
@@ -181,10 +185,14 @@ class RuntimePatchSerializer(serializers.Serializer):
         unknown_fields = received_fields - set(defined_fields)
 
         if unknown_fields:
-            raise serializers.ValidationError({field: ["Unknown field."] for field in sorted(unknown_fields)})
+            raise serializers.ValidationError(
+                {field: ["Unknown field."] for field in sorted(unknown_fields)}
+            )
 
         if not received_fields:
-            raise serializers.ValidationError({"request": ["PATCH request cannot be empty."]})
+            raise serializers.ValidationError(
+                {"request": ["PATCH request cannot be empty."]}
+            )
 
         for field_slug, field in defined_fields.items():
             if field_slug not in received_fields:
@@ -193,7 +201,9 @@ class RuntimePatchSerializer(serializers.Serializer):
             generator = get_generator(field.generator_key)
 
             if generator is None:
-                raise serializers.ValidationError({field_slug: [f"Unknown generator: {field.generator_key}."]})
+                raise serializers.ValidationError(
+                    {field_slug: [f"Unknown generator: {field.generator_key}."]}
+                )
 
             generator_options = field.generator_options or {}
 

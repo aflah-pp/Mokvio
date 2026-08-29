@@ -12,7 +12,9 @@ class TelegramService:
 
     @staticmethod
     def send_message(chat_id, text):
-        url = f"https://api.telegram.org/" f"bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+        url = (
+            f"https://api.telegram.org/" f"bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+        )
 
         response = requests.post(
             url,
@@ -86,7 +88,11 @@ class TelegramWebhookView(View):
         if text == "/start":
             self.send(
                 chat_id,
-                ("🤖 Mokvio Bot\n\n" "/tickets - List feedback tickets\n" "/ticket <ticket> - View ticket details"),
+                (
+                    "🤖 Mokvio Bot\n\n"
+                    "/tickets - List feedback tickets\n"
+                    "/ticket <ticket> - View ticket details"
+                ),
             )
 
         elif text == "/tickets":
@@ -111,7 +117,9 @@ class TelegramWebhookView(View):
         )
 
     def send_ticket_list(self, chat_id):
-        tickets = FeedBack.objects.select_related("created_by").order_by("-created_at")[:20]
+        tickets = FeedBack.objects.select_related("created_by").order_by("-created_at")[
+            :20
+        ]
 
         if not tickets:
             self.send(
@@ -124,7 +132,9 @@ class TelegramWebhookView(View):
 
         for feedback in tickets:
             lines.append(
-                f"🎫 {feedback.ticket}\n" f"📌 {feedback.title}\n" f"🏷 {feedback.get_type_of_feedback_display()}\n"
+                f"🎫 {feedback.ticket}\n"
+                f"📌 {feedback.title}\n"
+                f"🏷 {feedback.get_type_of_feedback_display()}\n"
             )
 
         lines.append("\nUse /ticket <ticket> to view details.")

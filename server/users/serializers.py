@@ -122,4 +122,10 @@ class ChangePasswordSerializer(serializers.Serializer):
 class FeedBackCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedBack
-        fields = ["title", "description", "steps_to_reproduce", "actual_behavior", "type_of_feedback"]
+        fields = [
+            "title",
+            "description",
+            "steps_to_reproduce",
+            "actual_behavior",
+            "type_of_feedback",
+        ]

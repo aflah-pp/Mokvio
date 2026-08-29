@@ -52,12 +52,14 @@ class FeedBack(UUIDPrimaryKeyMixin, AuditMixin):
         USER_EXPERIENCE = "USER EXPERIENCE", "User Experience"
         GENERAL = "GENERAL", "General"
 
-    ticket = models.CharField(max_length=20,unique=True,db_index=True)
+    ticket = models.CharField(max_length=20, unique=True, db_index=True)
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=150)
     steps_to_reproduce = models.CharField(max_length=150)
     actual_behavior = models.CharField(max_length=150)
-    type_of_feedback = models.CharField(max_length=50, choices=Types, default=Types.GENERAL)
+    type_of_feedback = models.CharField(
+        max_length=50, choices=Types, default=Types.GENERAL
+    )
 
     def __str__(self):
         return f"{self.title} by {self.created_by}"

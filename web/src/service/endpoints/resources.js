@@ -14,7 +14,6 @@ export const getResource = async (projectSlug, resourceSlug) => {
 
 export const createResource = async (projectSlug, payload) => {
   const { data } = await api.post(`/projects/${projectSlug}/resources/`, payload);
-
   return data;
 };
 

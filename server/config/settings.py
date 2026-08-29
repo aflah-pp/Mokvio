@@ -22,7 +22,11 @@ if ENVIRONMENT not in {"development", "production"}:
     raise ValueError("DJANGO_ENV must be either 'development' or 'production'.")
 
 
-ENV_FILE = BASE_DIR / ".env.production" if ENVIRONMENT == "production" else BASE_DIR / ".env.development"
+ENV_FILE = (
+    BASE_DIR / ".env.production"
+    if ENVIRONMENT == "production"
+    else BASE_DIR / ".env.development"
+)
 
 
 if ENV_FILE.exists():
@@ -116,7 +120,10 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": ("django.contrib.auth.password_validation." "UserAttributeSimilarityValidator"),
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
     },
     {
         "NAME": ("django.contrib.auth.password_validation." "MinimumLengthValidator"),
@@ -170,7 +177,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_PARSER_CLASSES": (
@@ -336,7 +345,7 @@ SECURE_PROXY_SSL_HEADER = (
 
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_TRACK_STARTED = True
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND",default="")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="")
 CELERY_REDIS_BACKEND_USE_SSL = {
     "ssl_cert_reqs": ssl.CERT_REQUIRED,
 }
