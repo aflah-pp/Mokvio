@@ -13,7 +13,7 @@ from rest_framework_simplejwt.token_blacklist.models import (
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from shared.tasks import send_feedback_telegram_notification
+from shared.telegram import TelegramService
 from users.models import FeedBack, User
 
 logger = logging.getLogger(__name__)
@@ -520,7 +520,7 @@ class FeedbackService:
         )
 
         transaction.on_commit(
-            lambda: send_feedback_telegram_notification.delay(str(feedback.pk))
+            lambda: TelegramService.send_ticket_notification(feedback)
         )
 
         return feedback

@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { CheckCircle2, Send } from "lucide-react";
+import {
+  Bug,
+  CheckCircle2,
+  FileText,
+  Lightbulb,
+  MessageCircle,
+  Send,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +15,40 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { createFeedback } from "@/service/endpoints/feedback";
 
-export default function FeedbackForm({ feedbackTypes }) {
+const FEEDBACK_TYPES = [
+  {
+    value: "BUG REPORT",
+    label: "Bug Report",
+    description: "Report something that is broken or behaving incorrectly.",
+    icon: Bug,
+  },
+  {
+    value: "FEATURE REQUEST",
+    label: "Feature Request",
+    description: "Suggest a new feature or improvement.",
+    icon: Lightbulb,
+  },
+  {
+    value: "DOCUMENTATION",
+    label: "Documentation",
+    description: "Report missing, incorrect, or unclear documentation.",
+    icon: FileText,
+  },
+  {
+    value: "USER EXPERIENCE",
+    label: "User Experience",
+    description: "Share feedback about the overall product experience.",
+    icon: Sparkles,
+  },
+  {
+    value: "GENERAL",
+    label: "General",
+    description: "Anything else you want to share with us.",
+    icon: MessageCircle,
+  },
+];
+
+export default function FeedbackForm() {
   const [feedbackType, setFeedbackType] = useState("BUG REPORT");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -18,9 +59,9 @@ export default function FeedbackForm({ feedbackTypes }) {
   const [error, setError] = useState("");
 
   const selectedType =
-    feedbackTypes.find((item) => item.value === feedbackType) ?? feedbackTypes[0];
+    FEEDBACK_TYPES.find((item) => item.value === feedbackType) ?? FEEDBACK_TYPES[0];
 
-  const SelectedIcon = selectedType?.icon;
+  const SelectedIcon = selectedType.icon;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -45,14 +86,26 @@ export default function FeedbackForm({ feedbackTypes }) {
       return;
     }
 
-    if (trimmedSteps.length > 150) {
-      setError("Steps to reproduce must be 150 characters or less.");
-      return;
-    }
+    if (feedbackType === "BUG REPORT") {
+      if (!trimmedSteps) {
+        setError("Steps to reproduce are required for bug reports.");
+        return;
+      }
 
-    if (trimmedActual.length > 150) {
-      setError("Actual behavior must be 150 characters or less.");
-      return;
+      if (!trimmedActual) {
+        setError("Actual behavior is required for bug reports.");
+        return;
+      }
+
+      if (trimmedSteps.length > 150) {
+        setError("Steps to reproduce must be 150 characters or less.");
+        return;
+      }
+
+      if (trimmedActual.length > 150) {
+        setError("Actual behavior must be 150 characters or less.");
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -62,8 +115,8 @@ export default function FeedbackForm({ feedbackTypes }) {
       type_of_feedback: feedbackType,
       title: trimmedTitle,
       description: trimmedDescription,
-      steps_to_reproduce: trimmedSteps,
-      actual_behavior: trimmedActual,
+      steps_to_reproduce: feedbackType === "BUG REPORT" ? trimmedSteps : "",
+      actual_behavior: feedbackType === "BUG REPORT" ? trimmedActual : "",
     };
 
     try {
@@ -78,6 +131,10 @@ export default function FeedbackForm({ feedbackTypes }) {
         setError(responseData.title[0]);
       } else if (responseData?.description?.[0]) {
         setError(responseData.description[0]);
+      } else if (responseData?.steps_to_reproduce?.[0]) {
+        setError(responseData.steps_to_reproduce[0]);
+      } else if (responseData?.actual_behavior?.[0]) {
+        setError(responseData.actual_behavior[0]);
       } else if (responseData?.type_of_feedback?.[0]) {
         setError(responseData.type_of_feedback[0]);
       } else {
@@ -133,7 +190,7 @@ export default function FeedbackForm({ feedbackTypes }) {
           </div>
 
           <div className="mt-5 space-y-2">
-            {feedbackTypes.map((item) => {
+            {FEEDBACK_TYPES.map((item) => {
               const Icon = item.icon;
               const active = feedbackType === item.value;
 
@@ -180,7 +237,7 @@ export default function FeedbackForm({ feedbackTypes }) {
               <li>• Explain what happened.</li>
               <li>• Tell us what you expected.</li>
               <li>• Include reproduction steps for bugs.</li>
-              <li>• Keep each field within the allowed length.</li>
+              <li>• Keep within the character limits.</li>
             </ul>
           </div>
         </aside>
@@ -195,7 +252,7 @@ export default function FeedbackForm({ feedbackTypes }) {
               </p>
 
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {feedbackTypes.map((item) => {
+                {FEEDBACK_TYPES.map((item) => {
                   const Icon = item.icon;
                   const active = feedbackType === item.value;
 
@@ -288,6 +345,7 @@ export default function FeedbackForm({ feedbackTypes }) {
                     placeholder={"1. Open...\n2. Click...\n3. Observe..."}
                     className="min-h-24 resize-none"
                     maxLength={150}
+                    required
                     disabled={submitting}
                   />
 
@@ -311,6 +369,7 @@ export default function FeedbackForm({ feedbackTypes }) {
                     placeholder="What actually happened?"
                     className="min-h-24 resize-none"
                     maxLength={150}
+                    required
                     disabled={submitting}
                   />
 
@@ -333,9 +392,9 @@ export default function FeedbackForm({ feedbackTypes }) {
 
             <div className="mt-4 rounded-lg border bg-muted/20 px-3 py-2.5">
               <div className="flex items-center gap-2">
-                {SelectedIcon && <SelectedIcon className="size-3.5 text-primary" />}
+                <SelectedIcon className="size-3.5 text-primary" />
 
-                <span className="text-[11px] font-medium">{selectedType?.label}</span>
+                <span className="text-[11px] font-medium">{selectedType.label}</span>
 
                 <span className="text-[10px] text-muted-foreground">·</span>
 
