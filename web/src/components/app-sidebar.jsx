@@ -7,11 +7,9 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/compone
 
 import {
   TerminalSquareIcon,
-  BotIcon,
   Settings2Icon,
   LifeBuoyIcon,
   FrameIcon,
-  BookMarkedIcon,
   ShieldCheckIcon,
   FileTextIcon,
   LucideLayoutDashboard,
@@ -44,11 +42,6 @@ const data = {
           url: "/project/create",
         },
       ],
-    },
-    {
-      title: "Active API Endpoints",
-      url: "/api/active",
-      icon: <BotIcon />,
     },
     {
       title: "Settings",
@@ -91,11 +84,6 @@ const data = {
       name: "Documentation V1.0",
       url: "/docs",
       icon: <FrameIcon />,
-    },
-    {
-      name: "Resource Templates",
-      url: "/resource/templates",
-      icon: <BookMarkedIcon />,
     },
   ],
 };
