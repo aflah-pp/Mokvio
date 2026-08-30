@@ -5,18 +5,30 @@ import DocsPagination from "@/features/docs/components/navigation/doc-pagination
 const content = `
 # Installation
 
-There are currently two ways to use Mokvio:
+Mokvio can be used in two ways:
 
 1. **Hosted Mokvio**
 2. **Self-hosted Mokvio**
 
-Choose the option that works for you.
-
 ## Hosted Mokvio
 
-If you are using the hosted version of Mokvio, you don't need to install anything.
+If you are using the hosted version of Mokvio, you do not need to install anything.
 
-You don't need:
+You only need a browser.
+
+\`\`\`text
+Browser
+   ↓
+Mokvio
+   ↓
+Create Mock API
+   ↓
+Use API in Your Application
+\`\`\`
+
+Open Mokvio, create your project, and start creating your mock API.
+
+You do not need to install:
 
 - Python
 - Node.js
@@ -24,29 +36,9 @@ You don't need:
 - Django
 - React
 
-Just create an account and open the dashboard.
+## Self-hosted Mokvio
 
-From there you can:
-
-\`\`\`text
-Create Project
-      ↓
-Create Resource
-      ↓
-Add Fields
-      ↓
-Choose Generators
-      ↓
-Publish
-      ↓
-Use Your Mock API
-\`\`\`
-
-This is the easiest way to use Mokvio.
-
-## Self-host Mokvio
-
-If you want to run Mokvio on your own machine, you can clone the project and run the frontend and backend yourself.
+If you want to run Mokvio on your own machine, you can clone the project and run the frontend and backend locally.
 
 ### Requirements
 
@@ -58,9 +50,9 @@ You need:
 - npm
 - PostgreSQL
 
-You don't need to know Django or React to use Mokvio.
+You do not need to know Django or React to use Mokvio.
 
-Those are the technologies used to build the platform.
+These are the technologies used to build the platform.
 
 ## 1. Clone Mokvio
 
@@ -71,7 +63,7 @@ git clone <repository-url>
 cd Mokvio
 \`\`\`
 
-The project has two main parts:
+The project contains two main parts:
 
 \`\`\`text
 Mokvio
@@ -125,7 +117,7 @@ Mokvio uses environment variables for its configuration.
 
 Set up your local environment according to the project's environment configuration.
 
-Your backend will need values such as:
+Typical values include:
 
 \`\`\`text
 SECRET_KEY
@@ -133,7 +125,7 @@ DATABASE_URL
 CORS_ALLOWED_ORIGINS
 \`\`\`
 
-For PostgreSQL, your database URL will look similar to:
+For PostgreSQL, the database URL will look similar to:
 
 \`\`\`text
 DATABASE_URL=postgresql://username:password@localhost:5432/mokvio
@@ -141,7 +133,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/mokvio
 
 Use your own PostgreSQL username, password, host, port, and database name.
 
-Do not commit your environment file or secrets to Git.
+Do not commit environment files or secrets to Git.
 
 ## 5. Create the PostgreSQL database
 
@@ -153,19 +145,18 @@ For example:
 mokvio
 \`\`\`
 
-Then point \`DATABASE_URL\` to that database.
+Then configure \`DATABASE_URL\` to point to that database.
 
-Mokvio stores things such as:
+Mokvio stores API configuration such as:
 
-- Users
 - Projects
 - Resources
 - Fields
 - Generator configuration
 
-Mock data itself is generated when the API is requested.
+Generated mock data is produced when the API is requested.
 
-## 6. Run the database migrations
+## 6. Run database migrations
 
 From the \`server\` directory:
 
@@ -228,24 +219,22 @@ Open that address in your browser.
 Once the frontend and backend are running:
 
 1. Open Mokvio.
-2. Create an account.
-3. Sign in.
-4. Create a project.
-5. Create a resource.
-6. Add some fields.
-7. Choose generators.
-8. Publish the resource.
-9. Open the generated API URL.
+2. Create a project.
+3. Create a resource.
+4. Add fields.
+5. Configure generators.
+6. Publish the resource.
+7. Open the generated API URL.
+8. Make an HTTP request.
+9. Verify that the API returns JSON.
 
-If the endpoint returns JSON data, your Mokvio installation is working.
+If the API responds correctly, your local Mokvio installation is working.
 
 ## Hosted vs Self-hosted
 
 ### Hosted
 
-Use the hosted version if you want the easiest setup.
-
-You only need:
+Hosted Mokvio requires no local setup.
 
 \`\`\`text
 Browser
@@ -253,13 +242,9 @@ Browser
 Mokvio
 \`\`\`
 
-You don't have to manage the server or database yourself.
-
 ### Self-hosted
 
-Use self-hosting if you want to run Mokvio on your own machine or infrastructure.
-
-The setup is:
+Self-hosted Mokvio runs on infrastructure you control.
 
 \`\`\`text
 Browser
@@ -275,36 +260,55 @@ You are responsible for running and maintaining these services.
 
 ## Docker
 
-Docker support is **not available yet** in the current version of Mokvio.
+Docker support is not available in the current version of Mokvio.
 
-The current self-hosted setup runs directly using:
+The current self-hosted setup uses:
 
 - Python
 - Node.js
 - PostgreSQL
 
-Docker support can be added in a future release.
-
-## Do I need to install anything in my React project?
+## Do I need a Mokvio package?
 
 No.
 
-You don't need a Mokvio npm package.
+Mokvio does not require an npm package or SDK.
 
-Once you have a mock API URL, you can use it like any other API.
+Once you have a mock API URL, use it like any other HTTP API.
 
-For example:
+You can use:
 
 - Fetch
 - Axios
 - React Query
+- Postman
 - Any HTTP client
+
+## Final workflow
+
+Once Mokvio is installed, the complete workflow is:
+
+\`\`\`text
+Project
+   ↓
+Resource
+   ↓
+Fields
+   ↓
+Generators
+   ↓
+Publish
+   ↓
+Mock API
+   ↓
+HTTP Requests
+   ↓
+Frontend / Mobile Application
+\`\`\`
 
 ## Next step
 
-If Mokvio is running, continue with **Quick Start**.
-
-You will create your first mock API in a few minutes.
+Continue with **Quick Start** to create your first mock API.
 `;
 
 function Installation() {

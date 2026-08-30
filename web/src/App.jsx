@@ -9,16 +9,9 @@ import Login from "@/features/auth/Login";
 import Register from "@/features/auth/Register";
 import MainDashBoardPage from "@/features/dashboard/MainDashBoardPage";
 import ProjectsList from "@/features/dashboard/ProjectsList";
-import ConnectMokvio from "@/features/docs/pages/api/connect-mokvio";
-import DataGenerators from "@/features/docs/pages/build-doc/data-generators";
-import Fields from "@/features/docs/pages/build-doc/fields";
-import ProjectsResources from "@/features/docs/pages/build-doc/projects-resources";
-import Installation from "@/features/docs/pages/getting-started/installation";
-import Introduction from "@/features/docs/pages/getting-started/introduction";
-import QuickStart from "@/features/docs/pages/getting-started/quick-start";
-import ApiReference from "@/features/docs/pages/references/api-reference";
-import GeneratorsReference from "@/features/docs/pages/references/generator-reference";
-import Roadmap from "@/features/docs/pages/RoadMap";
+import Installation from "@/features/docs/pages/installation";
+import Introduction from "@/features/docs/pages/introduction";
+import QuickStart from "@/features/docs/pages/quick-start";
 import ProjectDetailPage from "@/features/projects/ProjectDetail";
 import ProjectFormPage from "@/features/projects/ProjectFormPage";
 import FieldFormPage from "@/features/resources/FieldFormPage";
@@ -32,7 +25,6 @@ import NotFound from "@/pages/Page404";
 import PrivacyPolicyPage from "@/pages/policy/PrivacyPolicyPage";
 import TermsPage from "@/pages/policy/Terms";
 import SupportPage from "@/pages/support/SupportPage";
-import UpcomingFeatures from "@/pages/UpComing";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import PublicOnlyRoute from "@/routes/PublicOnlyRoute";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
@@ -50,13 +42,6 @@ function App() {
         <Route path="/docs/getting-started/introduction" element={<Introduction />} />
         <Route path="/docs/getting-started/installation" element={<Installation />} />
         <Route path="/docs/getting-started/quick-start" element={<QuickStart />} />
-        <Route path="/docs/build/projects-resources" element={<ProjectsResources />} />
-        <Route path="/docs/build/fields" element={<Fields />} />
-        <Route path="/docs/build/data-generators" element={<DataGenerators />} />
-        <Route path="/docs/api/connect-mokvio" element={<ConnectMokvio />} />
-        <Route path="/docs/reference/api" element={<ApiReference />} />
-        <Route path="/docs/reference/generators" element={<GeneratorsReference />} />
-        <Route path="/docs/roadmap" element={<Roadmap />} />
 
         {/* Auth Routes */}
         <Route element={<PublicOnlyRoute />}>
@@ -96,10 +81,7 @@ function App() {
           <Route path="/about/creator" element={<CreatorPage />} />
           <Route path="/support" element={<SupportPage />} />
           {/* Upcoming  */}
-          <Route path="/api/active" element={<UpcomingFeatures />} />
-          <Route path="/resource/templates" element={<UpcomingFeatures />} />
         </Route>
-        <Route path="/forgot-password" element={<UpcomingFeatures />} />
 
         {/* Policy */}
 
